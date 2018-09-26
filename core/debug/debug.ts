@@ -9,7 +9,7 @@ export class Debug {
   private readonly addToLog: Function;
 
   constructor(private context: Context) {
-    this.scope = context.module.name + ':' + context.name;
+    this.scope = context.moduleName + ':' + context.name;
     this.addToLog = createDebug(this.scope);
   }
 

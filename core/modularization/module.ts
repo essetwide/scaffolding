@@ -5,6 +5,7 @@ interface ModuleOptions {
   imports: Array<Function>;
   singletons: Array<Function>;
   factories: Array<Function>;
+  bootstrap?: Array<Function>;
 }
 
 export function Module(options: ModuleOptions): ClassDecorator {
@@ -15,25 +16,33 @@ export function Module(options: ModuleOptions): ClassDecorator {
         this.name = options.name || Class.name;
 
         const importedDeclarations = new Map<string, any>();
-        options.imports.forEach(M => {
-          // @ts-ignore
-          new M().container.declarations.forEach((val, key) => {
-            importedDeclarations.set(key, val);
-          });
+        
+        options.imports.forEach(ModuleDeclaration => {
+            (new (ModuleDeclaration.bind(this))).container.declarations
+            .forEach((val, key) => {
+              importedDeclarations.set(key, val);
+            });
         });
-        this.container = new Container(this, importedDeclarations);
 
-        options.singletons.forEach(s => this.addSingleton(s));
-        options.factories.forEach(f => this.addFactory(f));
+        this.container = new Container(this.name, importedDeclarations);
+
+        options.singletons.forEach(declaration => this.addSingleton(declaration));
+        options.factories.forEach(declaration => this.addFactory(declaration));
 
         const dependencies = Reflect.getMetadata('design:paramtypes', Class);
-        if (dependencies)
-          new (Class.bind(this, ...dependencies.map(d => this.container.resolve('Main', d.name))));
+        if (dependencies) {
+          const resolvedDependencies = dependencies.map(d => this.container.resolve('Main', d.name));
+          new (Class.bind(this, ...resolvedDependencies));
+        }
+        
+        if (options.bootstrap)
+          options.bootstrap.forEach(b => {
+            this.container.resolve('Main', b.name);
+          });
       }
     }
   };
 }
-
 
 export class ModuleContainer {
   name: string;
@@ -41,12 +50,12 @@ export class ModuleContainer {
 
   addSingleton(Singleton: Function) {
     const dependencies = Reflect.getMetadata('design:paramtypes', Singleton);
-    this.container.declareSingleton(Singleton.name, Singleton, dependencies);
+    this.container.declare(Singleton.name, dependencies, Singleton);
   }
 
   addFactory(Factory: Function) {
     const dependencies = Reflect.getMetadata('design:paramtypes', Factory);
-    this.container.declareFactory(Factory.name, Factory, dependencies);
+    this.container.declareFactory(Factory.name, dependencies, Factory);
   }
 }
 

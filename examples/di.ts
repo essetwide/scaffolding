@@ -5,6 +5,7 @@ import { DebugModule, Debug } from '../core/debug';
 @Injectable()
 class HomeController {
   constructor(public debug: Debug) {
+    console.log(debug);
     debug.log('Hello from HomeController!');
   }
 }
@@ -12,7 +13,8 @@ class HomeController {
 @Module({
   imports: [ DebugModule ],
   singletons: [ HomeController ],
-  factories: []
+  factories: [],
+  bootstrap: [ HomeController ]
 })
 class TestModule {
   constructor(public debug: Debug) {

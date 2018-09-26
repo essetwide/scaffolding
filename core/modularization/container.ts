@@ -1,66 +1,64 @@
 import 'reflect-metadata';
-import { ModuleContainer } from './module';
+
+export class Declaration {
+  public instance = null
+  constructor(public Class: Function,
+              public type: 'SINGLETON' | 'FACTORY' = 'SINGLETON') {}
+}
 
 export class Context {
-  module: ModuleContainer;
-  name: string;
+  constructor(public readonly moduleName: string,
+              public readonly name: string) {}
 }
 
 export class Container {
-  declarations = new Map<string, any>();
-  private readonly module: ModuleContainer;
+  declarations = new Map<string, Declaration>();
+  private readonly moduleName: string;
 
-  constructor(module: ModuleContainer, declarations) {
-    this.module = module;
+  constructor(moduleName: string, declarations?: Map<string, Declaration>) {
+    this.moduleName = moduleName;
 
     if (declarations)
       this.declarations = declarations;
-
-    const DependencyContext = class extends Context {
-      constructor() {
-        super();
-        this.module = module;
-      }
-    };
-
-    this.declareFactory('Context', DependencyContext, []);
+    
+    this.declarations.set('Context', new Declaration(Context));
   }
 
-  declareSingleton(name: string, Class: Function, dependencies: Array<Function>) {
-    const resolvedDependencies = dependencies.map(d => this.resolve(name, d.name));
-
-    resolvedDependencies.forEach(r => {
-      if (r instanceof Context) {
-        r.module = this.module;
-        r.name = name;
-      }
-    });
-
-    // @ts-ignore
-    const instance = new Class(...resolvedDependencies);
-    this.declarations.set(name, instance);
+  declare(name: string, dependencies: Array<Function>, Class: Function) {
+    const resolvedDependencies = this.resolveDependencies(name, dependencies);
+    this.declarations.set(name, new Declaration(Class.bind(this, resolvedDependencies)));
   }
 
-  declareFactory(name: string, Class: Function, dependencies: Array<Function>) {
-    const resolvedDependencies = dependencies.map(d => this.resolve(name, d.name));
-    this.declarations.set(name, { Factory: Class, resolvedDependencies, isFactory: true })
+  declareFactory(name: string, dependencies: Array<Function>, Class: Function) {
+      const resolvedDependencies = this.resolveDependencies(name, dependencies);
+      this.declarations.set(name, new Declaration(Class.bind(this, resolvedDependencies), 'FACTORY'));
   }
 
   resolve(requesterName: string, dependencyName: string) {
     const declaration = this.declarations.get(dependencyName);
-
-    if (declaration.isFactory) {
-      declaration.resolvedDependencies.forEach(r => {
-        if (r instanceof Context) {
-          r.module = this.module;
-          r.name = requesterName;
+    
+    if (!declaration.instance) {
+      if (declaration.Class.name === 'Context') {
+        return new (declaration.Class.bind(this, [this.moduleName, requesterName]));
+      } else {
+        const instance = new (declaration.Class.bind(this));
+        
+        if (declaration.type === 'SINGLETON') {
+          declaration.instance = instance;
+          this.declarations.set(dependencyName, declaration);
         }
-      });
-      const factoryInstance = new declaration.Factory(...declaration.resolvedDependencies);
-
-      return factoryInstance;
+        
+        return instance;
+      }
     } else {
-      return declaration;
+      return declaration.instance;
     }
+  }
+  
+  resolveDependencies(requester: string, dependencies: Array<Function>): Array<any> {
+    if (dependencies) {
+         return dependencies.map(d => this.resolve(requester, d.name));
+    }
+    return [];
   }
 }
