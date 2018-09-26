@@ -1,0 +1,23 @@
+{
+  "name": "scaffolding",
+  "version": "1.0.0",
+  "description": "A Collection of utils to improve the structure of JS applications.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "essetwide",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "colors": "^1.3.2",
+    "debug": "^4.0.1",
+    "reflect-metadata": "^0.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "~8.9.4"
+  }
+}
