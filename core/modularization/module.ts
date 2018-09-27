@@ -33,11 +33,9 @@ export function Module(options: ModuleOptions): ClassDecorator {
         if (dependencies) {
           const resolvedDependencies = dependencies.map(d => this.container.resolve('Main', d.name));
           const instance = new (Class.bind(this, ...resolvedDependencies));
-          if (instance.init) {
-            this.bootstrap(options.bootstrap)
-              .then(instance.init());
-          }
+
           this.bootstrap(options.bootstrap)
+            .then(() => instance.onInit && instance.onInit());
         }
       }
     }
@@ -63,8 +61,8 @@ export class ModuleContainer {
       const instance = this.container.resolve('Main', Class.name);
 
       // TODO: Replace to 'implements onInit'
-      if (instance.init) {
-        await instance.init();
+      if (instance.onInit) {
+        await instance.onInit();
       }
     }
   }

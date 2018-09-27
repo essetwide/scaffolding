@@ -1,3 +1,3 @@
 export abstract class OnInit {
-  abstract async init()
+  abstract async onInit()
 }
