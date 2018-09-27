@@ -17,7 +17,7 @@
   "scripts": {
     "test": "jest",
     "examples:di": "./node_modules/.bin/ts-node --project ./core/tsconfig.json ./examples/di.ts",
-    "release:beta": "npm run build && npm run build:prod && npm publish --tag beta --access=public"
+    "release:beta": "npm run build && npm run build:prod && npm publish --tag beta --access=public",
     "release": "npm publish --access=public"
   },
   "author": "Guilherme Prezzi <guilhermeprezzi1997@gmail.com>; @essetwide",
