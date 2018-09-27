@@ -1,19 +1,18 @@
-import { Controller } from './controller';
+export abstract class Component {
+  abstract template?: View | Function;
+  abstract state: Model;
 
-export abstract class Component extends Controller {
-    abstract template: View | Function;
-    abstract state: Model;
-    
-    abstract async render()
+  abstract async update()
 
-    async setState(newState) {
-        this.state = { ...this.state, ...newState };
-        await this.render();
-    }
+  async setState(newState) {
+    this.state = {...this.state, ...newState};
+    await this.update();
+  }
 }
 
 export abstract class View {
-    abstract compile(state: Model): string;
+  abstract compile(state: Model): string;
 }
 
-export class Model {}
+export class Model {
+}

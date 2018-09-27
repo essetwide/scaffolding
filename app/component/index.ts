@@ -1,1 +1,1 @@
-export { HTMLComponent } from'./html-component';
+export {HTMLComponent} from './html-component';

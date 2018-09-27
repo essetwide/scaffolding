@@ -1,11 +1,11 @@
-import { Injectable, Context } from '../modularization';
+import {Injectable, Context} from '../modularization';
 import createDebug from 'debug';
-import { yellow, magenta, red, blue } from 'colors';
+import {yellow, magenta, red, blue} from 'colors';
 
 
 @Injectable()
 export class Debug {
-  private readonly scope: string;
+  readonly scope: string;
   private readonly addToLog: Function;
 
   constructor(private context: Context) {

@@ -1,4 +1,4 @@
-import { Container } from './container';
+import {Container} from './container';
 
 interface ModuleOptions {
   name?: string;
@@ -16,9 +16,9 @@ export function Module(options: ModuleOptions): ClassDecorator {
         this.name = options.name || Class.name;
 
         const importedDeclarations = new Map<string, any>();
-        
+
         options.imports.forEach(ModuleDeclaration => {
-            (new (ModuleDeclaration.bind(this))).container.declarations
+          (new (ModuleDeclaration.bind(this))).container.declarations
             .forEach((val, key) => {
               importedDeclarations.set(key, val);
             });
@@ -32,13 +32,13 @@ export function Module(options: ModuleOptions): ClassDecorator {
         const dependencies = Reflect.getMetadata('design:paramtypes', Class);
         if (dependencies) {
           const resolvedDependencies = dependencies.map(d => this.container.resolve('Main', d.name));
-          new (Class.bind(this, ...resolvedDependencies));
+          const instance = new (Class.bind(this, ...resolvedDependencies));
+          if (instance.init) {
+            this.bootstrap(options.bootstrap)
+              .then(instance.init());
+          }
+          this.bootstrap(options.bootstrap)
         }
-        
-        if (options.bootstrap)
-          options.bootstrap.forEach(b => {
-            this.container.resolve('Main', b.name);
-          });
       }
     }
   };
@@ -56,6 +56,17 @@ export class ModuleContainer {
   addFactory(Factory: Function) {
     const dependencies = Reflect.getMetadata('design:paramtypes', Factory);
     this.container.declareFactory(Factory.name, dependencies, Factory);
+  }
+
+  async bootstrap(Classes: Array<Function>) {
+    for (let Class of Classes) {
+      const instance = this.container.resolve('Main', Class.name);
+
+      // TODO: Replace to 'implements onInit'
+      if (instance.init) {
+        await instance.init();
+      }
+    }
   }
 }
 

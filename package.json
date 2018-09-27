@@ -3,12 +3,9 @@
   "version": "1.0.0",
   "description": "A Collection of utils to improve the structure of JS applications.",
   "main": "index.js",
-  "directories": {
-    "example": "examples",
-    "test": "test"
-  },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "examples:di": "./node_modules/.bin/ts-node --project ./core/tsconfig.json ./examples/di.ts"
   },
   "author": "essetwide",
   "license": "Apache-2.0",
@@ -18,6 +15,8 @@
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
-    "@types/node": "~8.9.4"
+    "@types/node": "~8.9.4",
+    "typescript": "^3.0.3",
+    "ts-node": "^7.0.1"
   }
 }

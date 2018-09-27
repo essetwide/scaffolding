@@ -1,10 +1,10 @@
-import { Module } from '../modularization';
-import { Debug } from './debug';
+import {Module} from '../modularization';
+import {Debug} from './debug';
 
 @Module({
   imports: [],
   singletons: [],
-  factories: [ Debug ]
+  factories: [Debug]
 })
 export class DebugModule {
 
