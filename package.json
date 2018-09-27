@@ -1,6 +1,6 @@
 {
   "name": "@essetwide/scaffolding",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Collection of utils to help to improve the structure of JS applications.",
   "keywords": [
     "Dependency Injection",
@@ -17,8 +17,9 @@
   "scripts": {
     "test": "jest",
     "examples:di": "./node_modules/.bin/ts-node --project ./core/tsconfig.json ./examples/di.ts",
-    "release:beta": "npm run build && npm run build:prod && npm publish --tag beta --access=public",
-    "release": "npm publish --access=public"
+    "release:beta": "npm publish --tag beta --access=public",
+    "release": "npm publish --access=public",
+    "postpublish" : "PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag $PACKAGE_VERSION && git push --tags"
   },
   "author": "Guilherme Prezzi <guilhermeprezzi1997@gmail.com>; @essetwide",
   "license": "Apache-2.0",
